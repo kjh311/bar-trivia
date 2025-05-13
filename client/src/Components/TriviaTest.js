@@ -4,14 +4,17 @@ import { decode } from "he";
 
 const TriviaTest = () => {
   const [triviaData, setTriviaData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [options, setOptions] = useState([]);
   const [category, setCategory] = useState("");
   const [difficulty, setDifficulty] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
+  const retryDelayMs = 3000;
 
   const fetchTrivia = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     setLoading(true);
     setError(null);
     try {
@@ -19,12 +22,28 @@ const TriviaTest = () => {
         `https://opentdb.com/api.php?amount=10${category}${difficulty}`
       );
       setTriviaData(res.data);
+      setRetryCount(0); // Reset retry count on success
     } catch (err) {
       console.error("Failed to fetch trivia questions", err);
       setError(err);
+      if (err.response?.status === 429 && retryCount < maxRetries) {
+        console.log(
+          `Rate limited. Retrying in ${
+            retryDelayMs / 1000
+          } seconds... (Attempt ${retryCount + 1}/${maxRetries})`
+        );
+        setTimeout(fetchTriviaWithRetry, retryDelayMs);
+        setRetryCount((prevCount) => prevCount + 1);
+      } else {
+        setError(err);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchTriviaWithRetry = () => {
+    fetchTrivia();
   };
 
   useEffect(() => {
@@ -44,25 +63,15 @@ const TriviaTest = () => {
     }
   }, [triviaData]);
 
-  useEffect(() => {
-    console.log("Category: ", category, "difficulty: ", difficulty);
-  }, [category, difficulty]);
-
-  //   if (loading) {
-  //     return <div>Loading trivia questions...</div>;
-  //   }
-
   if (error) {
     return <div>Error loading trivia: {error.message}</div>;
   }
 
   return (
     <div>
-      {/* <button onClick={fetchTrivia}>Fetch</button> */}
-
-      <form onSubmit={fetchTrivia} className="bg-red-100 p-2 m-2">
+      <form onSubmit={fetchTrivia} className="bg-red-100 p-2 m-2 text-center">
         <select onChange={(e) => setCategory(e.target.value)}>
-          <option selected disabled>
+          <option defaultValue disabled>
             Select Category
           </option>
           <option value="&category=9">General Knowledge</option>
@@ -99,10 +108,10 @@ const TriviaTest = () => {
         <br />
 
         <select onChange={(e) => setDifficulty(e.target.value)}>
-          <option disabled selected>
+          <option disabled defaultValue>
             Difficulty
           </option>
-          <option value="&difficulty=east">East</option>
+          <option value="&difficulty=easy">East</option>
           <option value="&difficulty=medium">Medium</option>
           <option value="&difficulty=hard">Hard</option>
         </select>
@@ -113,6 +122,10 @@ const TriviaTest = () => {
           Submit
         </button>
       </form>
+      <br />
+      <br />
+
+      {loading && <p>Loading data...</p>}
 
       <br />
       <br />
