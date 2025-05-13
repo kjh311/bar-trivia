@@ -13,16 +13,16 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
 });
 
 //serve html file:
-const __dirname = dirname(fileURLToPath(import.meta.url));
-app.get("/", (req, res) => {
-  res.sendFile(join(__dirname, "index.html"));
-});
+// const __dirname = dirname(fileURLToPath(import.meta.url));
+// app.get("/", (req, res) => {
+//   res.sendFile(join(__dirname, "index.html"));
+// });
 
 app.use(
   cors({
@@ -31,13 +31,30 @@ app.use(
   })
 );
 
+import mongoose from "mongoose";
+import authRoutes from "../server/controllers/auth.js";
+
 dotenv.config();
+
+const PORT = process.env.PORT || 8080;
+
+app.use(express.json());
+app.use("/api/auth", authRoutes);
 
 io.on("connection", (socket) => {
   socket.on("chat message", (msg) => {
     io.emit("chat message", msg);
   });
 });
+
+// connect to mongoDB
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log(`✅ Connected to DB: ${mongoose.connection.name}`))
+  .catch((err) => console.error(err));
 
 // io.on("connection", (socket) => {
 //   // join the room named 'some room'
@@ -53,11 +70,9 @@ io.on("connection", (socket) => {
 //   socket.leave("some room");
 // });
 
-const PORT = process.env.PORT || 8080;
-
-// app.get("/", (req, res) => {
-//   res.send("Hello from Server.js!!");
-// });
+app.get("/", (req, res) => {
+  res.send("Hello from Server.js!!");
+});
 
 server.listen(PORT, "0.0.0.0", () =>
   console.log(`Server is running on port ${PORT}`)
