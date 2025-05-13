@@ -6,6 +6,8 @@ const ChatTest = () => {
   const socket = useRef(null);
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
+  const [userNameInput, setUserNameInput] = useState("");
+  const userName = localStorage.getItem("BarTriviaUserName");
 
   useEffect(() => {
     socket.current = io("http://localhost:8080");
@@ -32,28 +34,47 @@ const ChatTest = () => {
   const handleSubmitMessage = (e) => {
     e.preventDefault();
     if (messageInput.trim() === "") return;
-    setMessages([...messages, messageInput]);
+    if (socket.current && messageInput.trim()) {
+      socket.current.emit("chat message", messageInput);
+    }
     setMessageInput("");
   };
 
-  useEffect(() => {
-    console.log(messages);
-    if (socket.current && messageInput.trim()) {
-      socket.current.emit("chat message", messageInput);
-      setMessageInput(""); // Clear the input after sending
-    }
-  }, [messages]);
+  const handleUserNameSubmit = (e) => {
+    e.preventDefault();
+    if (userNameInput.trim() === "") return;
+
+    localStorage.setItem("BarTriviaUserName", userNameInput);
+
+    setUserNameInput("");
+  };
 
   return (
     <div>
       {" "}
+      <form onSubmit={handleUserNameSubmit}>
+        <input
+          type="text"
+          onChange={(e) => setUserNameInput(e.target.value)}
+          className="p-2 m-2 bg-blue-300 border"
+          placeholder="enter user name"
+          value={userNameInput}
+        />
+        <br />
+        <button type="submit">Submit</button>
+      </form>
       <ul id="messages">
         {messages.map((msg, index) => {
-          return <li key={index}>{msg}</li>;
+          return (
+            <li key={index}>
+              {userName ? userName : "User"}: {msg}
+            </li>
+          );
         })}
       </ul>
       <form id="form" action="" onSubmit={handleSubmitMessage}>
         <input
+          type="text"
           id="input"
           value={messageInput}
           autoComplete="off"
