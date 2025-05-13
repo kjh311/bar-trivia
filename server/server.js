@@ -32,7 +32,7 @@ app.use(
 );
 
 import mongoose from "mongoose";
-import authRoutes from "../server/controllers/auth.js";
+import authRoutes from "./controllers/auth.js";
 
 dotenv.config();
 

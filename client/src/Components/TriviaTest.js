@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { decode } from "he";
+import MyButton from "./MyButton";
 
 const TriviaTest = () => {
   const [triviaData, setTriviaData] = useState(null);
@@ -12,6 +13,7 @@ const TriviaTest = () => {
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
   const retryDelayMs = 3000;
+  //   const [clicked, setClicked] = useState(false);
 
   const fetchTrivia = async (e) => {
     e?.preventDefault();
@@ -22,7 +24,7 @@ const TriviaTest = () => {
         `https://opentdb.com/api.php?amount=10${category}${difficulty}`
       );
       setTriviaData(res.data);
-      setRetryCount(0); // Reset retry count on success
+      setRetryCount(0);
     } catch (err) {
       console.error("Failed to fetch trivia questions", err);
       setError(err);
@@ -68,7 +70,7 @@ const TriviaTest = () => {
   }
 
   return (
-    <div>
+    <div className="text-center">
       <form onSubmit={fetchTrivia} className="bg-red-100 p-2 m-2 text-center">
         <select onChange={(e) => setCategory(e.target.value)}>
           <option defaultValue disabled>
@@ -130,18 +132,18 @@ const TriviaTest = () => {
           <div>
             {options[index]?.map((option, optionIndex) => (
               <span key={optionIndex}>
-                <button
-                  className="p-2 m-2 bg-blue-200 border"
+                <MyButton
                   onClick={(e) => {
                     if (e.target.textContent === decode(item.correct_answer)) {
                       alert("Corrent!!!");
                     } else {
                       alert("Incorrect");
                     }
+                    // setClicked(true);
                   }}
                 >
                   <span>{option}</span>
-                </button>
+                </MyButton>
                 <br />
               </span>
             ))}
