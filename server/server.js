@@ -10,7 +10,13 @@ import { dirname, join } from "node:path";
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
 //serve html file:
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -27,25 +33,25 @@ app.use(
 
 dotenv.config();
 
-// io.on("connection", (socket) => {
-//   socket.on("chat message", (msg) => {
-//     io.emit("chat message", msg);
-//   });
-// });
-
 io.on("connection", (socket) => {
-  // join the room named 'some room'
-  socket.join("some room");
-
-  // broadcast to all connected clients in the room
-  io.to("some room").emit("hello", "world");
-
-  //   // broadcast to all connected clients except those in the room
-  //   io.except("some room").emit("hello", "world");
-
-  // leave the room
-  socket.leave("some room");
+  socket.on("chat message", (msg) => {
+    io.emit("chat message", msg);
+  });
 });
+
+// io.on("connection", (socket) => {
+//   // join the room named 'some room'
+//   socket.join("some room");
+
+//   // broadcast to all connected clients in the room
+//   io.to("some room").emit("hello", "world");
+
+//   //   // broadcast to all connected clients except those in the room
+//   //   io.except("some room").emit("hello", "world");
+
+//   // leave the room
+//   socket.leave("some room");
+// });
 
 const PORT = process.env.PORT || 8080;
 

@@ -79,26 +79,21 @@ const TriviaTest = () => {
           <option value="&category=11">Film</option>
           <option value="&category=12">Music</option>
           <option value="&category=13">Musicals and Theater</option>
-
           <option value="&category=14">TV</option>
           <option value="&category=15">Video Games</option>
           <option value="&category=16">Board Games</option>
           <option value="&category=17">Science and Nature</option>
-
           <option value="&category=18">Computers</option>
           <option value="&category=19">Mathematics</option>
           <option value="&category=20">Mythology</option>
           <option value="&category=21">Sports</option>
-
           <option value="&category=22">Geography</option>
           <option value="&category=23">History</option>
           <option value="&category=24">Politics</option>
           <option value="&category=25">Art</option>
-
           <option value="&category=26">Celebrities</option>
           <option value="&category=27">Animals</option>
           <option value="&category=28">Vehicles</option>
-
           <option value="&category=29">Comics</option>
           <option value="&category=30">Gadgets</option>
           <option value="&category=31">Manga</option>
@@ -111,7 +106,7 @@ const TriviaTest = () => {
           <option disabled defaultValue>
             Difficulty
           </option>
-          <option value="&difficulty=easy">East</option>
+          <option value="&difficulty=easy">Easy</option>
           <option value="&difficulty=medium">Medium</option>
           <option value="&difficulty=hard">Hard</option>
         </select>
@@ -138,7 +133,7 @@ const TriviaTest = () => {
                 <button
                   className="p-2 m-2 bg-blue-200 border"
                   onClick={(e) => {
-                    if (e.target.textContent === item.correct_answer) {
+                    if (e.target.textContent === decode(item.correct_answer)) {
                       alert("Corrent!!!");
                     } else {
                       alert("Incorrect");
