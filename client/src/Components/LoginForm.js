@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +28,7 @@ const LoginForm = () => {
       setSuccessMessage(message);
       setError("");
       console.log("Login successful:", response.data);
-      // Optionally redirect to the game room or dashboard here
+      navigate("/gameSetup");
     } catch (err) {
       if (err.response && err.response.status === 404) {
         setError(err.response.data.message || "User not found!");
@@ -60,6 +62,7 @@ const LoginForm = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              autoComplete="given-name"
             />
           </div>
           <div className="mt-4">
@@ -77,6 +80,7 @@ const LoginForm = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="password"
             />
           </div>
 

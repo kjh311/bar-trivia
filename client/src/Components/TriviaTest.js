@@ -135,7 +135,7 @@ const TriviaTest = () => {
                 <MyButton
                   onClick={(e) => {
                     if (e.target.textContent === decode(item.correct_answer)) {
-                      alert("Corrent!!!");
+                      //   alert("Corrent!!!");
                     } else {
                       alert("Incorrect");
                     }
