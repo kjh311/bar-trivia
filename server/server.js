@@ -42,8 +42,34 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 io.on("connection", (socket) => {
-  socket.on("chat message", (msg) => {
-    io.emit("chat message", msg);
+  //   socket.on("chat message", (msg) => {
+  //     io.emit("chat message", msg);
+  //   });
+
+  console.log("A user connected:", socket.id);
+
+  socket.on("joinRoom", (roomId) => {
+    socket.join(roomId);
+    console.log(`User ${socket.id} joined room ${roomId}`);
+    io.to(roomId).emit("userJoined", socket.id); // Notify others in the room
+  });
+
+  socket.on("playerAnswer", (data) => {
+    // Handle the player's answer, check for correctness, update scores
+    io.to(data.roomId).emit("answerReceived", {
+      playerId: socket.id,
+      answer: data.answer,
+    });
+  });
+
+  socket.on("nextQuestion", (roomId) => {
+    // Logic to fetch and emit the next question to the room
+    io.to(roomId).emit("newQuestion" /* next question data */);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.id);
+    // Handle user leaving rooms if needed
   });
 });
 
