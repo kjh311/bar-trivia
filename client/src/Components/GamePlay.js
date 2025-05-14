@@ -26,6 +26,7 @@ const GamePlay = ({
   const [answered, setAnswered] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState(null);
   const [userAnswer, setUserAnswer] = useState(null);
+  const [userScore, setUserScore] = useState(0);
 
   //   const [socket, setSocket] = useState(null);
   const [currentSocketQuestion, setCurrentSocketQuestion] = useState(null);
@@ -134,6 +135,12 @@ const GamePlay = ({
       setUserAnswer(selectedAnswer);
       // In a real game, you'd likely send this to the server
       // and wait for confirmation before moving to the next question
+
+      if (selectedAnswer === correctAnswer) {
+        setUserScore((prev) => prev + 1);
+        // In a real game, you'd likely send this to the server
+        // and wait for confirmation before moving to the next question
+      }
       setTimeout(() => {
         if (currentQuestionIndex < triviaData.length - 1) {
           setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
@@ -185,6 +192,7 @@ const GamePlay = ({
           </div>
         )}
       </div>
+      <h1>Score: {userScore}</h1>
 
       <br />
       <br />
