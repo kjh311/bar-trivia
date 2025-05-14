@@ -1,4 +1,4 @@
 # in .gitignore
-server/.env
+/server/.env
 
-# NOTES.md
+NOTES.md
