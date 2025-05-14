@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const GameSetup = () => {
+const GameSetup = ({
+  categories,
+  setCategories,
+  inviteeName,
+  setInviteeName,
+  invitedPlayers,
+  setInvitedPlayers,
+  isReady,
+  setIsReady,
+  selectedCategory,
+  setSelectedCategory,
+  selectedDifficulty,
+  setSelectedDifficulty,
+}) => {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedDifficulty, setSelectedDifficulty] = useState("");
-  const [inviteeName, setInviteeName] = useState("");
-  const [invitedPlayers, setInvitedPlayers] = useState([]);
-  const [isReady, setIsReady] = useState(false);
+
   const [errorMessage, setErrorMessage] = useState("");
 
   // Simulate fetching categories from an API
@@ -53,13 +61,14 @@ const GameSetup = () => {
     fetchCategories();
   }, []);
 
-  const handleCategoryChange = (event) => {
-    setSelectedCategory(event.target.value);
-  };
-
-  const handleDifficultyChange = (event) => {
-    setSelectedDifficulty(event.target.value);
-  };
+  useEffect(() => {
+    console.log(
+      "selectedCategory: ",
+      selectedCategory,
+      "selectedDifficulty: ",
+      selectedDifficulty
+    );
+  }, [selectedCategory, selectedDifficulty]);
 
   const handleInvitePlayer = () => {
     if (inviteeName.trim() && !invitedPlayers.includes(inviteeName.trim())) {
@@ -88,12 +97,20 @@ const GameSetup = () => {
         players: [...invitedPlayers, "You"],
       });
       // Navigate to the game component
-      navigate("/game"); // Replace '/game' with the actual path to your game component
+      //   navigate("/gamePlay"); // Replace '/game' with the actual path to your game component
     } else {
       setErrorMessage(
         "Please select a category and difficulty before starting."
       );
     }
+  };
+
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+  };
+
+  const handleDifficultyChange = (event) => {
+    setSelectedDifficulty(event.target.value);
   };
 
   return (

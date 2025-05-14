@@ -28,7 +28,7 @@ const LoginForm = () => {
       setSuccessMessage(message);
       setError("");
       console.log("Login successful:", response.data);
-      navigate("/gameSetup");
+      navigate("/gameParent");
     } catch (err) {
       if (err.response && err.response.status === 404) {
         setError(err.response.data.message || "User not found!");

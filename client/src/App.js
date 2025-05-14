@@ -1,6 +1,5 @@
 import React, { useContext, useState } from "react";
 import "./Stylesheets/App.css";
-import TriviaTest from "./Components/TriviaTest";
 import ChatTest from "./Components/ChatTest";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import RegisterForm from "./Components/RegisterForm";
@@ -8,7 +7,8 @@ import LoginForm from "./Components/LoginForm";
 import Navbar from "./Components/Navbar";
 import Home from "./Components/Home";
 import ProtectedRoute from "./Components/ProtectedRoute";
-import GameSetup from "./Components/GameSetup";
+import GameParentComponent from "./Components/GameParentComponent";
+import GamePlay from "./Components/GamePlay";
 
 export const UserNameContext = React.createContext();
 
@@ -22,20 +22,28 @@ function App() {
       <UserNameContext.Provider value={[userName, setUserName]}>
         <Router>
           <Navbar />
-          {/* <TriviaTest /> */}
           <Routes>
             <Route exact path="/" element={<Home />} />
             <Route exact path="/register" element={<RegisterForm />} />
             <Route exact path="/login" element={<LoginForm />} />
             <Route
               exact
-              path="/gameSetup"
+              path="/gameParent"
               element={
                 <ProtectedRoute>
-                  <GameSetup />
+                  <GameParentComponent />
                 </ProtectedRoute>
               }
             />
+            {/* <Route
+              exact
+              path="/gamePlay"
+              element={
+                <ProtectedRoute>
+                  <GamePlay />
+                </ProtectedRoute>
+              }
+            /> */}
 
             {/* <ChatTest /> */}
           </Routes>
