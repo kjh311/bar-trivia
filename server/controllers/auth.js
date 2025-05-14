@@ -20,6 +20,8 @@ router.post("/register", async (req, res) => {
       name,
       //   email,
       password: hashedPassword,
+      highScore: "0", // Explicitly set the initial highScore
+      friends: [],
     });
 
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {

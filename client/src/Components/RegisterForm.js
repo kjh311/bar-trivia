@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const RegisterForm = () => {
   const [name, setName] = useState("");
@@ -8,6 +9,7 @@ const RegisterForm = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,6 +36,7 @@ const RegisterForm = () => {
       setSuccessMessage(message); // Use message directly
       setError("");
       console.log("Registration successful:", response.data);
+      navigate("/gameParent");
     } catch (err) {
       if (err.response && err.response.status === 409) {
         setError(err.response.data.message || "Username already exists!");
