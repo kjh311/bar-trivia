@@ -4,6 +4,7 @@ import GameSetup from "./GameSetup";
 import GamePlay from "./GamePlay";
 import { io } from "socket.io-client";
 import { UserNameContext } from "../App";
+import ProgressBar from "./ProgressBar";
 
 const GameParentComponent = () => {
   const [inviteeName, setInviteeName] = useState("");
@@ -31,24 +32,27 @@ const GameParentComponent = () => {
     //   .substring(7)}`;
     // roomIdRef.current = roomId;
     // newSocket.emit("joinRoom", roomId);
-    const currentUsername = userName; // Replace with your actual username
+    // const currentUsername = userName; // Replace with your actual username
 
     const roomId = "test-room"; // Temporarily hardcoded
     roomIdRef.current = roomId;
-    newSocket.emit("joinRoom", { roomId, name: currentUsername });
+    // newSocket.emit("joinRoom", { roomId, name: currentUsername });
+
+    console.log("Connecting socket with ID:", newSocket.id);
+
+    // newSocket.emit("joinRoom", { roomId, name: currentUsername });
+
+    // Immediately add the current user to playersInRoom
+    setPlayersInRoom([{ playerId: newSocket.id, name: userName }]);
 
     newSocket.on("userJoined", (data) => {
       console.log("Received userJoined:", data);
       setPlayersInRoom((prevPlayers) => {
         if (!prevPlayers.find((p) => p.playerId === data.playerId)) {
-          return [
-            ...prevPlayers,
-            { playerId: data.playerId, username: data.name },
-          ];
+          return [...prevPlayers, { playerId: data.playerId, name: data.name }];
         }
         return prevPlayers;
       });
-      console.log("playersInRoom after userJoined:", playersInRoom);
     });
 
     newSocket.on("existingUsers", (users) => {
@@ -56,18 +60,21 @@ const GameParentComponent = () => {
       setPlayersInRoom(users);
       console.log("playersInRoom after existingUsers:", playersInRoom);
     });
+
     newSocket.on("userLeft", (data) => {
       setPlayersInRoom((prevPlayers) =>
         prevPlayers.filter((player) => player.playerId !== data.playerId)
       );
       console.log("Received userLeft:", data);
     });
+
     newSocket.on("newQuestion", (questionData) => {
       setCurrentSocketQuestion(questionData);
       setAnswered(false);
       setCorrectAnswer(null);
       setUserAnswer(null);
     });
+
     return () => {
       if (socket) {
         console.log("Socket disconnected"); // Add this log
@@ -75,6 +82,10 @@ const GameParentComponent = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    console.log("playersInRoom after userJoined:", playersInRoom);
+  }, [playersInRoom]);
 
   return (
     <div>

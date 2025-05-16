@@ -44,13 +44,15 @@ io.on("connection", (socket) => {
       rooms[roomId] = { users: {} };
     }
     rooms[roomId].users[socket.id] = name;
+    console.log("Rooms state after user joined:", rooms);
 
     io.to(roomId).emit("userJoined", { playerId: socket.id, name });
     console.log("Emitted userJoined:", { playerId: socket.id, name });
 
+    console.log("Rooms state before emitting existingUsers:", rooms);
     const existingUsers = Object.entries(rooms[roomId].users)
       .filter(([id]) => id !== socket.id)
-      .map(([id, name]) => ({ playerId: id, name: name })); // Use the userName from the map
+      .map(([id, name]) => ({ playerId: id, name: name }));
     socket.emit("existingUsers", existingUsers);
     console.log("Emitted existingUsers:", existingUsers);
   });
@@ -85,12 +87,12 @@ io.on("connection", (socket) => {
         rooms[roomId].users &&
         rooms[roomId].users[socket.id]
       ) {
-        const username = rooms[roomId].users[socket.id];
+        const name = rooms[roomId].users[socket.id];
         delete rooms[roomId].users[socket.id];
-        io.to(roomId).emit("userLeft", { playerId: socket.id, username });
+        io.to(roomId).emit("userLeft", { playerId: socket.id, name });
         console.log(`Emitted userLeft to room: ${roomId}`, {
           playerId: socket.id,
-          username,
+          name,
         });
         console.log("Rooms state after userLeft:", rooms);
       } else {
