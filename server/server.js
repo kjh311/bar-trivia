@@ -71,15 +71,32 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnecting", () => {
-    const currentRooms = Object.keys(socket.rooms).filter(
+    console.log("User disconnecting:", socket.id);
+    console.log("Socket rooms on disconnecting:", socket.rooms);
+
+    const currentRooms = Array.from(socket.rooms).filter(
       (r) => r !== socket.id
-    );
+    ); // Convert Set to Array
+
     currentRooms.forEach((roomId) => {
-      if (rooms[roomId]?.users[socket.id]) {
+      console.log("Checking room:", roomId);
+      if (
+        rooms[roomId] &&
+        rooms[roomId].users &&
+        rooms[roomId].users[socket.id]
+      ) {
         const username = rooms[roomId].users[socket.id];
         delete rooms[roomId].users[socket.id];
         io.to(roomId).emit("userLeft", { playerId: socket.id, username });
-        console.log(`User ${socket.id} (${username}) left room ${roomId}`);
+        console.log(`Emitted userLeft to room: ${roomId}`, {
+          playerId: socket.id,
+          username,
+        });
+        console.log("Rooms state after userLeft:", rooms);
+      } else {
+        console.log(
+          `User ${socket.id} not found in rooms[${roomId}] or room doesn't exist.`
+        );
       }
     });
   });

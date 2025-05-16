@@ -60,6 +60,7 @@ const GameParentComponent = () => {
       setPlayersInRoom((prevPlayers) =>
         prevPlayers.filter((player) => player.playerId !== data.playerId)
       );
+      console.log("Received userLeft:", data);
     });
     newSocket.on("newQuestion", (questionData) => {
       setCurrentSocketQuestion(questionData);
