@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { decode } from "he";
 import MyButton from "./MyButton";
-import { io } from "socket.io-client";
 
 const GamePlay = ({
   categories,
@@ -17,19 +16,30 @@ const GamePlay = ({
   setSelectedCategory,
   selectedDifficulty,
   setSelectedDifficulty,
+
+  setAnswered,
+  setUserAnswer,
+  correctAnswer,
+  setCorrectAnswer,
+  socket,
+  answered,
+  roomIdRef,
+  playersInRoom,
+  currentSocketQuestion,
+  userAnswer,
 }) => {
   const [triviaData, setTriviaData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [options, setOptions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answered, setAnswered] = useState(false);
-  const [correctAnswer, setCorrectAnswer] = useState(null);
-  const [userAnswer, setUserAnswer] = useState(null);
+  //   const [answered, setAnswered] = useState(false);
+  //   const [correctAnswer, setCorrectAnswer] = useState(null);
+  //   const [userAnswer, setUserAnswer] = useState(null);
   const [userScore, setUserScore] = useState(0);
 
   //   const [socket, setSocket] = useState(null);
-  const [currentSocketQuestion, setCurrentSocketQuestion] = useState(null);
+  //   const [currentSocketQuestion, setCurrentSocketQuestion] = useState(null);
   //   const [playersInRoom, setPlayersInRoom] = useState([]);
   //   const roomIdRef = useRef(null);
 
@@ -41,36 +51,40 @@ const GamePlay = ({
   const maxRetries = 3;
   const retryDelayMs = 3000;
 
-  const [socket, setSocket] = useState(null);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [playersInRoom, setPlayersInRoom] = useState([]);
-  const roomIdRef = useRef(null); // To store the room ID
+  //   const [socket, setSocket] = useState(null);
+  //   const [currentQuestion, setCurrentQuestion] = useState(null);
+  //   const [playersInRoom, setPlayersInRoom] = useState([]);
+  //   const roomIdRef = useRef(null); // To store the room ID
 
-  useEffect(() => {
-    const newSocket = io("http://localhost:8080");
-    setSocket(newSocket);
-    const roomId = `trivia-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(7)}`;
-    roomIdRef.current = roomId;
-    newSocket.emit("joinRoom", roomId);
-    newSocket.on("userJoined", (playerId) => {
-      setPlayersInRoom((prevPlayers) => [...prevPlayers, playerId]);
-    });
-    newSocket.on("newQuestion", (questionData) => {
-      setCurrentSocketQuestion(questionData);
-      setAnswered(false);
-      setCorrectAnswer(null);
-      setUserAnswer(null);
-    });
-    return () => {
-      newSocket.disconnect();
-    };
-  }, []);
+  //   useEffect(() => {
+  //     const newSocket = io("http://localhost:8080");
+  //     setSocket(newSocket);
+  //     const roomId = `trivia-${Date.now()}-${Math.random()
+  //       .toString(36)
+  //       .substring(7)}`;
+  //     roomIdRef.current = roomId;
+  //     newSocket.emit("joinRoom", roomId);
+  //     newSocket.on("userJoined", (playerId) => {
+  //       setPlayersInRoom((prevPlayers) => [...prevPlayers, playerId]);
+  //     });
+  //     newSocket.on("newQuestion", (questionData) => {
+  //       setCurrentSocketQuestion(questionData);
+  //       setAnswered(false);
+  //       setCorrectAnswer(null);
+  //       setUserAnswer(null);
+  //     });
+  //     return () => {
+  //       newSocket.disconnect();
+  //     };
+  //   }, []);
 
   useEffect(() => {
     fetchTriviaWithRetry();
   }, []);
+
+  useEffect(() => {
+    console.log("GamePlay - playersInRoom prop:", playersInRoom);
+  }, [playersInRoom]);
 
   useEffect(() => {
     console.log("triviaData in component:", triviaData);
@@ -174,7 +188,11 @@ const GamePlay = ({
       <br />
       <div>
         <h2>Game Room: {roomIdRef.current}</h2>
-        <p>Players in room: {playersInRoom.join(", ")}</p>
+        <ul>
+          {playersInRoom.map((player) => (
+            <li key={player.playerId}>{player.name}</li>
+          ))}
+        </ul>
         {currentSocketQuestion && (
           <div>
             {/* Render socket-driven question if available */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 const GameSetup = ({
@@ -14,6 +14,7 @@ const GameSetup = ({
   setSelectedCategory,
   selectedDifficulty,
   setSelectedDifficulty,
+  userName,
 }) => {
   const navigate = useNavigate();
 
