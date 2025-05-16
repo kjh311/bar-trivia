@@ -4,7 +4,7 @@ import GameSetup from "./GameSetup";
 import GamePlay from "./GamePlay";
 import { io } from "socket.io-client";
 import { UserNameContext } from "../App";
-import ProgressBar from "./ProgressBar";
+// import ProgressBar from "./ProgressBar";
 
 const GameParentComponent = () => {
   const [inviteeName, setInviteeName] = useState("");
@@ -23,6 +23,9 @@ const GameParentComponent = () => {
   const [correctAnswer, setCorrectAnswer] = useState(null);
   const [userAnswer, setUserAnswer] = useState(null);
   const [userName, setUserName] = useContext(UserNameContext);
+
+  const [points, setPoints] = useState(1000);
+  const [collapsing, setCollapsing] = useState(false);
 
   useEffect(() => {
     const newSocket = io("http://localhost:8080");
@@ -103,6 +106,10 @@ const GameParentComponent = () => {
           setSelectedCategory={setSelectedCategory}
           selectedDifficulty={selectedDifficulty}
           setSelectedDifficulty={setSelectedDifficulty}
+          points={points}
+          setPoints={setPoints}
+          collapsing={collapsing}
+          setCollapsing={setCollapsing}
         />
       ) : (
         <GamePlay
@@ -128,6 +135,10 @@ const GameParentComponent = () => {
           playersInRoom={playersInRoom}
           currentSocketQuestion={currentQuestion}
           userAnswer={userAnswer}
+          points={points}
+          setPoints={setPoints}
+          collapsing={collapsing}
+          setCollapsing={setCollapsing}
           //   playersInRoom={playersInRoom}
         />
       )}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { decode } from "he";
 import MyButton from "./MyButton";
+import ProgressBar from "./ProgressBar";
 
 const GamePlay = ({
   categories,
@@ -27,6 +28,10 @@ const GamePlay = ({
   playersInRoom,
   currentSocketQuestion,
   userAnswer,
+  points,
+  setPoints,
+  collapsing,
+  setCollapsing,
 }) => {
   const [triviaData, setTriviaData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -183,75 +188,87 @@ const GamePlay = ({
   const currentTriviaQuestion = triviaData[currentQuestionIndex];
 
   return (
-    <div className="text-center">
-      <br />
-      <br />
-      <div>
-        <h2>Game Room: {roomIdRef.current}</h2>
-        <ul>
-          {playersInRoom.map((player) => (
-            <li key={player.playerId}>{player.name}</li>
-          ))}
-        </ul>
-        {currentSocketQuestion && (
-          <div>
-            {/* Render socket-driven question if available */}
-            <h3>{decode(currentSocketQuestion.question)}</h3>
+    <>
+      <div className="text-center">
+        <br />
+        <br />
+        <div>
+          <h2>Game Room: {roomIdRef.current}</h2>
+          <ul>
+            {playersInRoom.map((player) => (
+              <li key={player.playerId}>{player.name}</li>
+            ))}
+          </ul>
+          {currentSocketQuestion && (
             <div>
-              {currentSocketQuestion.options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => /* Handle socket answer */ console.log(option)}
-                >
-                  {decode(option)}
-                </button>
+              {/* Render socket-driven question if available */}
+              <h3>{decode(currentSocketQuestion.question)}</h3>
+              <div>
+                {currentSocketQuestion.options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() =>
+                      /* Handle socket answer */ console.log(option)
+                    }
+                  >
+                    {decode(option)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <h1>Score: {userScore}</h1>
+
+        <br />
+        <br />
+        {currentTriviaQuestion && (
+          <div>
+            <h3>
+              Question {currentQuestionIndex + 1}:{" "}
+              {decode(currentTriviaQuestion.question)}
+            </h3>
+            <div>
+              {options.map((option, optionIndex) => (
+                <span key={optionIndex}>
+                  <button
+                    onClick={() => handleAnswer(option)}
+                    disabled={answered}
+                    className={`px-4 py-2 rounded m-2 ${
+                      answered
+                        ? option === correctAnswer
+                          ? "bg-green-500 text-white"
+                          : option === userAnswer && option !== correctAnswer
+                          ? "bg-red-500 text-white"
+                          : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-700 text-white"
+                    }`}
+                  >
+                    <span>{option}</span>
+                  </button>
+                  <br />
+                </span>
               ))}
             </div>
+            {answered && (
+              <p>
+                {userAnswer === correctAnswer
+                  ? "Correct!"
+                  : `Incorrect. The correct answer was: ${correctAnswer}`}
+              </p>
+            )}
           </div>
         )}
       </div>
-      <h1>Score: {userScore}</h1>
-
-      <br />
-      <br />
-      {currentTriviaQuestion && (
-        <div>
-          <h3>
-            Question {currentQuestionIndex + 1}:{" "}
-            {decode(currentTriviaQuestion.question)}
-          </h3>
-          <div>
-            {options.map((option, optionIndex) => (
-              <span key={optionIndex}>
-                <button
-                  onClick={() => handleAnswer(option)}
-                  disabled={answered}
-                  className={`px-4 py-2 rounded m-2 ${
-                    answered
-                      ? option === correctAnswer
-                        ? "bg-green-500 text-white"
-                        : option === userAnswer && option !== correctAnswer
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-700 text-white"
-                  }`}
-                >
-                  <span>{option}</span>
-                </button>
-                <br />
-              </span>
-            ))}
-          </div>
-          {answered && (
-            <p>
-              {userAnswer === correctAnswer
-                ? "Correct!"
-                : `Incorrect. The correct answer was: ${correctAnswer}`}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+      {/* <div className="flex justify-center flex-column"> */}
+      <ProgressBar
+        points={points}
+        setPoints={setPoints}
+        collapsing={collapsing}
+        setCollapsing={setCollapsing}
+      />
+      {/* </div> */}
+    </>
   );
 };
 

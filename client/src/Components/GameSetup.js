@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import ProgressBar from "./ProgressBar";
 
 const GameSetup = ({
   categories,
@@ -15,6 +16,10 @@ const GameSetup = ({
   selectedDifficulty,
   setSelectedDifficulty,
   userName,
+  points,
+  setPoints,
+  collapsing,
+  setCollapsing,
 }) => {
   const navigate = useNavigate();
 
@@ -217,6 +222,7 @@ const GameSetup = ({
           Start Game
         </button>
       </div>
+      <ProgressBar />
     </div>
   );
 };

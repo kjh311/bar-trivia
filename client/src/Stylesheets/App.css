@@ -1,2 +1,38 @@
 .App {
 }
+
+.progress-bar-outer {
+  width: 50vw;
+  height: 30px;
+  background-color: gray;
+  display: block;
+  margin: 10px;
+  border-radius: 20px;
+  border: 2px solid black;
+  z-index: 1;
+  position: relative;
+}
+
+.progress-bar-inner {
+  z-index: 2;
+  background-color: blue;
+  float: left;
+  position: absolute;
+  height: 26px;
+  border-radius: 20px;
+  left: 0;
+}
+
+.collapse-width {
+  animation: collapseWidth linear 5s forwards;
+  width: 100%;
+}
+
+@keyframes collapseWidth {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
