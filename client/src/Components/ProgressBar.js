@@ -1,13 +1,33 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
+import { PointsContext } from "./GameParentComponent";
 
-const ProgressBar = () => {
+const ProgressBar = ({
+  totalUserScore,
+  setTotalUserScore,
+  userScore,
+  setUserScore,
+  startProgressBar,
+  setStartProgressBar,
+  collapsing,
+  setCollapsing,
+  restartProgressBar,
+  setRestartProgressBar,
+}) => {
+  //   console.log("ProgressBar: setPoints prop:", setPoints);
   const [width, setWidth] = useState(100);
-  const [points, setPoints] = useState(1000);
-  const [collapsing, setCollapsing] = useState(false);
+  const [points, setPoints] = useContext(PointsContext);
+  //   const [displayedPoints, setDisplayedPoints] = useState(1000);
+  //   const [collapsing, setCollapsing] = useState(false);
   //   const intervalRef = useRef(null);
   const progressBarInnerRef = useRef(null);
 
   useEffect(() => {
+    if (restartProgressBar) {
+      setWidth(100);
+      setPoints(1000);
+      setRestartProgressBar(false);
+    }
+
     const startCollapse = setTimeout(() => {
       setCollapsing(true);
     }, 3000);
@@ -37,12 +57,22 @@ const ProgressBar = () => {
       clearTimeout(startCollapse);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [collapsing]);
+  }, [collapsing, startProgressBar]);
 
   useEffect(() => {
     // Update points based on the width state
     setPoints(Math.round(width * 10));
+    if (width === 0) {
+      setRestartProgressBar(true);
+      //   console.log("Progress restartProgressBar: ", restartProgressBar);
+      //   setCollapsing(false);
+      //   console.log("Progressbar restart");
+    }
   }, [width]);
+
+  useEffect(() => {
+    console.log("RESTART: ", restartProgressBar);
+  }, [restartProgressBar]);
 
   //   const points = Math.round(width * 10);
 

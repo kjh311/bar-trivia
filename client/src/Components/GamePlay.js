@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { decode } from "he";
 import MyButton from "./MyButton";
 import ProgressBar from "./ProgressBar";
+import { PointsContext } from "./GameParentComponent";
 
 const GamePlay = ({
   categories,
@@ -17,7 +18,6 @@ const GamePlay = ({
   setSelectedCategory,
   selectedDifficulty,
   setSelectedDifficulty,
-
   setAnswered,
   setUserAnswer,
   correctAnswer,
@@ -28,60 +28,24 @@ const GamePlay = ({
   playersInRoom,
   currentSocketQuestion,
   userAnswer,
-  points,
-  setPoints,
   collapsing,
   setCollapsing,
+  totalUserScore,
+  setTotalUserScore,
 }) => {
+  console.log("GamePlay: totalScore:", totalUserScore);
   const [triviaData, setTriviaData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [options, setOptions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  //   const [answered, setAnswered] = useState(false);
-  //   const [correctAnswer, setCorrectAnswer] = useState(null);
-  //   const [userAnswer, setUserAnswer] = useState(null);
+  const [points, setPoints] = useContext(PointsContext);
   const [userScore, setUserScore] = useState(0);
-
-  //   const [socket, setSocket] = useState(null);
-  //   const [currentSocketQuestion, setCurrentSocketQuestion] = useState(null);
-  //   const [playersInRoom, setPlayersInRoom] = useState([]);
-  //   const roomIdRef = useRef(null);
-
-  //   const [triviaData, setTriviaData] = useState([]);
-  //   const [loading, setLoading] = useState(false);
-  //   const [error, setError] = useState(null);
-  //   const [options, setOptions] = useState([]);
+  const [restartProgressBar, setRestartProgressBar] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
   const retryDelayMs = 3000;
-
-  //   const [socket, setSocket] = useState(null);
-  //   const [currentQuestion, setCurrentQuestion] = useState(null);
-  //   const [playersInRoom, setPlayersInRoom] = useState([]);
-  //   const roomIdRef = useRef(null); // To store the room ID
-
-  //   useEffect(() => {
-  //     const newSocket = io("http://localhost:8080");
-  //     setSocket(newSocket);
-  //     const roomId = `trivia-${Date.now()}-${Math.random()
-  //       .toString(36)
-  //       .substring(7)}`;
-  //     roomIdRef.current = roomId;
-  //     newSocket.emit("joinRoom", roomId);
-  //     newSocket.on("userJoined", (playerId) => {
-  //       setPlayersInRoom((prevPlayers) => [...prevPlayers, playerId]);
-  //     });
-  //     newSocket.on("newQuestion", (questionData) => {
-  //       setCurrentSocketQuestion(questionData);
-  //       setAnswered(false);
-  //       setCorrectAnswer(null);
-  //       setUserAnswer(null);
-  //     });
-  //     return () => {
-  //       newSocket.disconnect();
-  //     };
-  //   }, []);
+  const [startProgressBar, setStartProgressBar] = useState(false);
 
   useEffect(() => {
     fetchTriviaWithRetry();
@@ -135,11 +99,14 @@ const GamePlay = ({
   };
 
   useEffect(() => {
-    if (triviaData.length > 0) {
+    if (triviaData.length > 0 && currentQuestionIndex < triviaData.length) {
+      // Check for array length and index
       const currentQuestion = triviaData[currentQuestionIndex];
       const incorrectAnswers =
         currentQuestion?.incorrect_answers?.map(decode) || [];
-      const correctAnswer = decode(currentQuestion?.correct_answer) || "";
+      const correctAnswer = currentQuestion?.correct_answer
+        ? decode(currentQuestion.correct_answer)
+        : ""; //handle undefined
       const all = [...incorrectAnswers, correctAnswer].sort(
         () => Math.random() - 0.5
       );
@@ -148,28 +115,34 @@ const GamePlay = ({
     }
   }, [triviaData, currentQuestionIndex]);
 
+  useEffect(() => {
+    if (restartProgressBar) {
+      setTimeout(() => {
+        setCollapsing(false);
+        setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+      }, 3000);
+    }
+  }, [restartProgressBar]);
+
   const handleAnswer = (selectedAnswer) => {
     if (!answered) {
       setAnswered(true);
       setUserAnswer(selectedAnswer);
-      // In a real game, you'd likely send this to the server
-      // and wait for confirmation before moving to the next question
+
+      console.log("SetStartProgressBar: ", startProgressBar);
 
       if (selectedAnswer === correctAnswer) {
-        setUserScore((prev) => prev + 1);
-        // In a real game, you'd likely send this to the server
-        // and wait for confirmation before moving to the next question
+        setTotalUserScore((prev) => prev + points);
       }
       setTimeout(() => {
         if (currentQuestionIndex < triviaData.length - 1) {
-          setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+          console.log("RESTART");
           setAnswered(false);
           setUserAnswer(null);
         } else {
           alert("End of questions!");
-          // Optionally navigate to a results screen
         }
-      }, 2000); // Show feedback for 2 seconds
+      }, 2000);
     }
   };
 
@@ -218,7 +191,8 @@ const GamePlay = ({
             </div>
           )}
         </div>
-        <h1>Score: {userScore}</h1>
+        <h1>Score: {points}</h1>
+        <h1>Total Score: {totalUserScore}</h1>
 
         <br />
         <br />
@@ -260,14 +234,18 @@ const GamePlay = ({
           </div>
         )}
       </div>
-      {/* <div className="flex justify-center flex-column"> */}
       <ProgressBar
-        points={points}
-        setPoints={setPoints}
         collapsing={collapsing}
         setCollapsing={setCollapsing}
+        totalUserserScore={totalUserScore}
+        setTotalUserScore={setTotalUserScore}
+        userScore={userScore}
+        setUserScore={setUserScore}
+        startProgressBar={startProgressBar}
+        setStartProgressBar={setStartProgressBar}
+        restartProgressBar={restartProgressBar}
+        setRestartProgressBar={setRestartProgressBar}
       />
-      {/* </div> */}
     </>
   );
 };

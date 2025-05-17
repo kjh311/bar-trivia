@@ -6,6 +6,8 @@ import { io } from "socket.io-client";
 import { UserNameContext } from "../App";
 // import ProgressBar from "./ProgressBar";
 
+export const PointsContext = React.createContext();
+
 const GameParentComponent = () => {
   const [inviteeName, setInviteeName] = useState("");
   const [invitedPlayers, setInvitedPlayers] = useState([]);
@@ -26,6 +28,7 @@ const GameParentComponent = () => {
 
   const [points, setPoints] = useState(1000);
   const [collapsing, setCollapsing] = useState(false);
+  const [totalUserScore, setTotalUserScore] = useState(0);
 
   useEffect(() => {
     const newSocket = io("http://localhost:8080");
@@ -91,58 +94,60 @@ const GameParentComponent = () => {
   }, [playersInRoom]);
 
   return (
-    <div>
-      {!isReady ? (
-        <GameSetup
-          categories={categories}
-          setCategories={setCategories}
-          inviteeName={inviteeName}
-          setInviteeName={setInviteeName}
-          invitedPlayers={invitedPlayers}
-          setInvitedPlayers={setInvitedPlayers}
-          isReady={isReady}
-          setIsReady={setIsReady}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          selectedDifficulty={selectedDifficulty}
-          setSelectedDifficulty={setSelectedDifficulty}
-          points={points}
-          setPoints={setPoints}
-          collapsing={collapsing}
-          setCollapsing={setCollapsing}
-        />
-      ) : (
-        <GamePlay
-          categories={categories}
-          setCategories={setCategories}
-          inviteeName={inviteeName}
-          setInviteeName={setInviteeName}
-          invitedPlayers={invitedPlayers}
-          setInvitedPlayers={setInvitedPlayers}
-          isReady={isReady}
-          setIsReady={setIsReady}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          selectedDifficulty={selectedDifficulty}
-          setSelectedDifficulty={setSelectedDifficulty}
-          setAnswered={setAnswered}
-          setUserAnswer={setUserAnswer}
-          correctAnswer={correctAnswer}
-          setCorrectAnswer={setCorrectAnswer}
-          socket={socket}
-          answered={answered}
-          roomIdRef={roomIdRef}
-          playersInRoom={playersInRoom}
-          currentSocketQuestion={currentQuestion}
-          userAnswer={userAnswer}
-          points={points}
-          setPoints={setPoints}
-          collapsing={collapsing}
-          setCollapsing={setCollapsing}
-          //   playersInRoom={playersInRoom}
-        />
-      )}
-    </div>
+    <PointsContext.Provider value={[points, setPoints]}>
+      <div>
+        {!isReady ? (
+          <GameSetup
+            categories={categories}
+            setCategories={setCategories}
+            inviteeName={inviteeName}
+            setInviteeName={setInviteeName}
+            invitedPlayers={invitedPlayers}
+            setInvitedPlayers={setInvitedPlayers}
+            isReady={isReady}
+            setIsReady={setIsReady}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            selectedDifficulty={selectedDifficulty}
+            setSelectedDifficulty={setSelectedDifficulty}
+            points={points}
+            setPoints={setPoints}
+            collapsing={collapsing}
+            setCollapsing={setCollapsing}
+          />
+        ) : (
+          <GamePlay
+            categories={categories}
+            setCategories={setCategories}
+            inviteeName={inviteeName}
+            setInviteeName={setInviteeName}
+            invitedPlayers={invitedPlayers}
+            setInvitedPlayers={setInvitedPlayers}
+            isReady={isReady}
+            setIsReady={setIsReady}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            selectedDifficulty={selectedDifficulty}
+            setSelectedDifficulty={setSelectedDifficulty}
+            setAnswered={setAnswered}
+            setUserAnswer={setUserAnswer}
+            correctAnswer={correctAnswer}
+            setCorrectAnswer={setCorrectAnswer}
+            socket={socket}
+            answered={answered}
+            roomIdRef={roomIdRef}
+            playersInRoom={playersInRoom}
+            currentSocketQuestion={currentQuestion}
+            userAnswer={userAnswer}
+            collapsing={collapsing}
+            setCollapsing={setCollapsing}
+            totalUserScore={totalUserScore}
+            setTotalUserScore={setTotalUserScore}
+            //   playersInRoom={playersInRoom}
+          />
+        )}
+      </div>
+    </PointsContext.Provider>
   );
 };
 

@@ -222,7 +222,7 @@ const GameSetup = ({
           Start Game
         </button>
       </div>
-      <ProgressBar />
+      {/* <ProgressBar /> */}
     </div>
   );
 };
