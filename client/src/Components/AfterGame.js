@@ -8,6 +8,10 @@ const AfterGame = () => {
   const [highScore, setHighScore] = useContext(HighScoreContext);
   const [totalUserScore, setTotalUserScore] = useContext(TotalScoreContext);
 
+  const handleResetUserScore = () => {
+    setTotalUserScore(0);
+  };
+
   return (
     <div className="text-center">
       <br />
@@ -18,7 +22,11 @@ const AfterGame = () => {
       <h3>Your High Score: {highScore}!!</h3>
       <br />
       {/* Try again? */}
-      <Link className="p-2 m-2 bg-blue-200" to={"../gameParent"}>
+      <Link
+        onClick={handleResetUserScore}
+        className="p-2 m-2 bg-blue-200"
+        to={"../gameParent"}
+      >
         Try Again?
       </Link>
     </div>
