@@ -6,6 +6,7 @@ import ProgressBar from "./ProgressBar";
 // Removed import for PointsContext
 import { useNavigate } from "react-router-dom";
 import { UserNameContext } from "../App"; // Ensure correct path to context
+import { HighScoreContext, TotalScoreContext } from "../App";
 
 const GamePlay = ({
   categories,
@@ -32,12 +33,7 @@ const GamePlay = ({
   userAnswer,
   collapsing,
   setCollapsing,
-  totalUserScore,
-  setTotalUserScore,
-  highScore,
-  setHighScore,
 }) => {
-  console.log("GamePlay: totalScore:", totalUserScore);
   const [triviaData, setTriviaData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -52,6 +48,9 @@ const GamePlay = ({
   const retryDelayMs = 3000;
   const [startProgressBar, setStartProgressBar] = useState(false); // This state seems unused, consider removing
   const navigate = useNavigate();
+  const [highScore, setHighScore] = useContext(HighScoreContext);
+  const [totalUserScore, setTotalUserScore] = useContext(TotalScoreContext);
+  console.log("GamePlay: totalScore:", totalUserScore);
 
   // Fetch trivia on component mount
   useEffect(() => {

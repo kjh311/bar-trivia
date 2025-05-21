@@ -25,8 +25,8 @@ const GameParentComponent = () => {
   const [userName, setUserName] = useContext(UserNameContext);
 
   const [collapsing, setCollapsing] = useState(false); // Controls ProgressBar animation
-  const [totalUserScore, setTotalUserScore] = useState(0); // Global score
-  const [highScore, setHighScore] = useState(0); // Global high score
+  //   const [totalUserScore, setTotalUserScore] = useState(0); // Global score
+  //   const [highScore, setHighScore] = useState(0); // Global high score
 
   useEffect(() => {
     console.log("GameParentComponent: Socket setup useEffect.");
@@ -135,10 +135,10 @@ const GameParentComponent = () => {
           userAnswer={userAnswer}
           collapsing={collapsing}
           setCollapsing={setCollapsing}
-          totalUserScore={totalUserScore}
-          setTotalUserScore={setTotalUserScore}
-          highScore={highScore}
-          setHighScore={setHighScore}
+          //   totalUserScore={totalUserScore}
+          //   setTotalUserScore={setTotalUserScore}
+          //   highScore={highScore}
+          //   setHighScore={setHighScore}
         />
       )}
     </div>
