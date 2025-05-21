@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import dotenv from "dotenv";
 import cors from "cors";
 import { Server } from "socket.io";
+// import authRoutes from './routes/auth.js';
 
 const app = express();
 const server = createServer(app);

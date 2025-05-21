@@ -18,7 +18,9 @@ export const TotalScoreContext = React.createContext();
 
 function App() {
   const [totalUserScore, setTotalUserScore] = useState(0); // Global score
-  const [highScore, setHighScore] = useState(0); // Global high score
+  const [highScore, setHighScore] = useState(
+    localStorage.getItem("Bar-Trivia-User-High-Score")
+  ); // Global high score
   const [userName, setUserName] = useState(
     localStorage.getItem("Bar-Trivia-Username" || "")
   );

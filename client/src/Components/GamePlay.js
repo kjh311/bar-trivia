@@ -7,6 +7,7 @@ import ProgressBar from "./ProgressBar";
 import { useNavigate } from "react-router-dom";
 import { UserNameContext } from "../App"; // Ensure correct path to context
 import { HighScoreContext, TotalScoreContext } from "../App";
+// import axios from "axios";
 
 const GamePlay = ({
   categories,
@@ -49,6 +50,7 @@ const GamePlay = ({
   const [startProgressBar, setStartProgressBar] = useState(false); // This state seems unused, consider removing
   const navigate = useNavigate();
   const [highScore, setHighScore] = useContext(HighScoreContext);
+  const [userName, setUserName] = useContext(UserNameContext);
   const [totalUserScore, setTotalUserScore] = useContext(TotalScoreContext);
   console.log("GamePlay: totalScore:", totalUserScore);
 
@@ -95,6 +97,7 @@ const GamePlay = ({
       const res = await axios.get(url);
       setTriviaData(res.data.results || []);
       setRetryCount(0);
+      setTotalUserScore(0);
     } catch (err) {
       setError(err);
       if (err.response?.status === 429 && retryCount < maxRetries) {
@@ -115,6 +118,43 @@ const GamePlay = ({
 
   const fetchTriviaWithRetry = () => {
     fetchTrivia();
+  };
+
+  const handleSetDataBaseHighScore = async (newScore) => {
+    if (!userName) {
+      console.log("Cannot update high score: No username available.");
+      return;
+    }
+    const token = localStorage.getItem("token"); // Get the authentication token
+    if (!token) {
+      console.log("Cannot update high score: No authentication token found.");
+      return;
+    }
+
+    try {
+      console.log(
+        `Attempting to update high score for ${userName} to ${newScore}`
+      );
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/update-high-score", // Your new backend endpoint
+        { username: userName, newScore: newScore },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Send the token in the header
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("High score update response:", response.data);
+      // You might want to update the local highScore state here if the backend confirms a new high score
+      if (response.data.user && response.data.user.highScore) {
+        setHighScore(response.data.user.highScore);
+      }
+      navigate("../afterGame");
+    } catch (err) {
+      console.error("Error updating high score:", err);
+      // Handle error (e.g., display a message to the user)
+    }
   };
 
   // Process current question and options
@@ -145,7 +185,10 @@ const GamePlay = ({
       // All questions answered
       console.log("GamePlay: All questions answered, navigating to afterGame.");
       alert("End of questions!"); // Use custom modal instead of alert in production
-      navigate("../afterGame");
+      if (highScore > localStorage.getItem("Bar-Trivia-User-High-Score")) {
+        localStorage.setItem("Bar-Trivia-User-High-Score", highScore);
+        handleSetDataBaseHighScore(highScore);
+      }
     }
   }, [
     triviaData,
