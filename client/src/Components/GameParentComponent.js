@@ -1,14 +1,12 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import GameSetup from "./GameSetup";
-// import TriviaTest from "./TriviaTest";
 import GamePlay from "./GamePlay";
 import { io } from "socket.io-client";
-import { UserNameContext } from "../App";
-// import ProgressBar from "./ProgressBar";
-
-export const PointsContext = React.createContext();
+import { UserNameContext } from "../App"; // Ensure correct path to context
+import AfterGame from "./AfterGame"; // Assuming this is used elsewhere
 
 const GameParentComponent = () => {
+  console.log("Parent Component: Rendered.");
   const [inviteeName, setInviteeName] = useState("");
   const [invitedPlayers, setInvitedPlayers] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -17,42 +15,37 @@ const GameParentComponent = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
 
   const [socket, setSocket] = useState(null);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(null); // This seems unused, currentSocketQuestion is used
   const [playersInRoom, setPlayersInRoom] = useState([]);
-  const roomIdRef = useRef(null); // To store the room ID
+  const roomIdRef = useRef(null);
   const [currentSocketQuestion, setCurrentSocketQuestion] = useState(null);
   const [answered, setAnswered] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState(null);
   const [userAnswer, setUserAnswer] = useState(null);
   const [userName, setUserName] = useContext(UserNameContext);
 
-  const [points, setPoints] = useState(1000);
-  const [collapsing, setCollapsing] = useState(false);
-  const [totalUserScore, setTotalUserScore] = useState(0);
+  const [collapsing, setCollapsing] = useState(false); // Controls ProgressBar animation
+  const [totalUserScore, setTotalUserScore] = useState(0); // Global score
+  const [highScore, setHighScore] = useState(0); // Global high score
 
   useEffect(() => {
+    console.log("GameParentComponent: Socket setup useEffect.");
     const newSocket = io("http://localhost:8080");
     setSocket(newSocket);
-    // const roomId = `trivia-${Date.now()}-${Math.random()
-    //   .toString(36)
-    //   .substring(7)}`;
-    // roomIdRef.current = roomId;
-    // newSocket.emit("joinRoom", roomId);
-    // const currentUsername = userName; // Replace with your actual username
 
     const roomId = "test-room"; // Temporarily hardcoded
     roomIdRef.current = roomId;
-    // newSocket.emit("joinRoom", { roomId, name: currentUsername });
 
-    console.log("Connecting socket with ID:", newSocket.id);
-
-    // newSocket.emit("joinRoom", { roomId, name: currentUsername });
+    console.log(
+      "GameParentComponent: Connecting socket with ID:",
+      newSocket.id
+    );
 
     // Immediately add the current user to playersInRoom
     setPlayersInRoom([{ playerId: newSocket.id, name: userName }]);
 
     newSocket.on("userJoined", (data) => {
-      console.log("Received userJoined:", data);
+      console.log("GameParentComponent: Received userJoined:", data);
       setPlayersInRoom((prevPlayers) => {
         if (!prevPlayers.find((p) => p.playerId === data.playerId)) {
           return [...prevPlayers, { playerId: data.playerId, name: data.name }];
@@ -62,19 +55,19 @@ const GameParentComponent = () => {
     });
 
     newSocket.on("existingUsers", (users) => {
-      console.log("Received existingUsers:", users);
+      console.log("GameParentComponent: Received existingUsers:", users);
       setPlayersInRoom(users);
-      console.log("playersInRoom after existingUsers:", playersInRoom);
     });
 
     newSocket.on("userLeft", (data) => {
+      console.log("GameParentComponent: Received userLeft:", data);
       setPlayersInRoom((prevPlayers) =>
         prevPlayers.filter((player) => player.playerId !== data.playerId)
       );
-      console.log("Received userLeft:", data);
     });
 
     newSocket.on("newQuestion", (questionData) => {
+      console.log("GameParentComponent: Received newQuestion.");
       setCurrentSocketQuestion(questionData);
       setAnswered(false);
       setCorrectAnswer(null);
@@ -82,72 +75,73 @@ const GameParentComponent = () => {
     });
 
     return () => {
-      if (socket) {
-        console.log("Socket disconnected"); // Add this log
+      if (newSocket) {
+        // Use newSocket directly from this closure
+        console.log("GameParentComponent: Socket disconnected in cleanup.");
         newSocket.disconnect();
       }
     };
-  }, []);
+  }, [userName]); // Added userName to dependencies as it's used in initial player setup
 
   useEffect(() => {
-    console.log("playersInRoom after userJoined:", playersInRoom);
+    console.log(
+      "GameParentComponent: playersInRoom state updated:",
+      playersInRoom
+    );
   }, [playersInRoom]);
 
   return (
-    <PointsContext.Provider value={[points, setPoints]}>
-      <div>
-        {!isReady ? (
-          <GameSetup
-            categories={categories}
-            setCategories={setCategories}
-            inviteeName={inviteeName}
-            setInviteeName={setInviteeName}
-            invitedPlayers={invitedPlayers}
-            setInvitedPlayers={setInvitedPlayers}
-            isReady={isReady}
-            setIsReady={setIsReady}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            selectedDifficulty={selectedDifficulty}
-            setSelectedDifficulty={setSelectedDifficulty}
-            points={points}
-            setPoints={setPoints}
-            collapsing={collapsing}
-            setCollapsing={setCollapsing}
-          />
-        ) : (
-          <GamePlay
-            categories={categories}
-            setCategories={setCategories}
-            inviteeName={inviteeName}
-            setInviteeName={setInviteeName}
-            invitedPlayers={invitedPlayers}
-            setInvitedPlayers={setInvitedPlayers}
-            isReady={isReady}
-            setIsReady={setIsReady}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            selectedDifficulty={selectedDifficulty}
-            setSelectedDifficulty={setSelectedDifficulty}
-            setAnswered={setAnswered}
-            setUserAnswer={setUserAnswer}
-            correctAnswer={correctAnswer}
-            setCorrectAnswer={setCorrectAnswer}
-            socket={socket}
-            answered={answered}
-            roomIdRef={roomIdRef}
-            playersInRoom={playersInRoom}
-            currentSocketQuestion={currentQuestion}
-            userAnswer={userAnswer}
-            collapsing={collapsing}
-            setCollapsing={setCollapsing}
-            totalUserScore={totalUserScore}
-            setTotalUserScore={setTotalUserScore}
-            //   playersInRoom={playersInRoom}
-          />
-        )}
-      </div>
-    </PointsContext.Provider>
+    <div>
+      {!isReady ? (
+        <GameSetup
+          categories={categories}
+          setCategories={setCategories}
+          inviteeName={inviteeName}
+          setInviteeName={setInviteeName}
+          invitedPlayers={invitedPlayers}
+          setInvitedPlayers={setInvitedPlayers}
+          isReady={isReady}
+          setIsReady={setIsReady}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          selectedDifficulty={selectedDifficulty}
+          setSelectedDifficulty={setSelectedDifficulty}
+          collapsing={collapsing}
+          setCollapsing={setCollapsing}
+        />
+      ) : (
+        <GamePlay
+          categories={categories}
+          setCategories={setCategories}
+          inviteeName={inviteeName}
+          setInviteeName={setInviteeName}
+          invitedPlayers={invitedPlayers}
+          setInvitedPlayers={setInvitedPlayers}
+          isReady={isReady}
+          setIsReady={setIsReady}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          selectedDifficulty={selectedDifficulty}
+          setSelectedDifficulty={setSelectedDifficulty}
+          setAnswered={setAnswered}
+          setUserAnswer={setUserAnswer}
+          correctAnswer={correctAnswer}
+          setCorrectAnswer={setCorrectAnswer}
+          socket={socket}
+          answered={answered}
+          roomIdRef={roomIdRef}
+          playersInRoom={playersInRoom}
+          currentSocketQuestion={currentSocketQuestion} // Corrected from currentQuestion
+          userAnswer={userAnswer}
+          collapsing={collapsing}
+          setCollapsing={setCollapsing}
+          totalUserScore={totalUserScore}
+          setTotalUserScore={setTotalUserScore}
+          highScore={highScore}
+          setHighScore={setHighScore}
+        />
+      )}
+    </div>
   );
 };
 

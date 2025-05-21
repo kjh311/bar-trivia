@@ -9,17 +9,21 @@ import Home from "./Components/Home";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import GameParentComponent from "./Components/GameParentComponent";
 import GamePlay from "./Components/GamePlay";
+import AfterGame from "./Components/AfterGame";
 
+// export const PointsContext = React.createContext();
 export const UserNameContext = React.createContext();
 
 function App() {
   const [userName, setUserName] = useState(
     localStorage.getItem("Bar-Trivia-Username" || "")
   );
+  const [points, setPoints] = useState(1000);
 
   return (
     <div className="App">
       <UserNameContext.Provider value={[userName, setUserName]}>
+        {/* <PointsContext.Provider value={[points, setPoints]}> */}
         <Router>
           <Navbar />
           <Routes>
@@ -35,19 +39,20 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* <Route
+            <Route
               exact
-              path="/gamePlay"
+              path="/afterGame"
               element={
                 <ProtectedRoute>
-                  <GamePlay />
+                  <AfterGame />
                 </ProtectedRoute>
               }
-            /> */}
+            />
 
             {/* <ChatTest /> */}
           </Routes>
         </Router>
+        {/* </PointsContext.Provider> */}
       </UserNameContext.Provider>
     </div>
   );

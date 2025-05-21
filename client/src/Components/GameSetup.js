@@ -21,6 +21,7 @@ const GameSetup = ({
   collapsing,
   setCollapsing,
 }) => {
+  console.log("Game Setup");
   const navigate = useNavigate();
 
   const [errorMessage, setErrorMessage] = useState("");

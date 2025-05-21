@@ -1,99 +1,135 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
-import { PointsContext } from "./GameParentComponent";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useImperativeHandle,
+  forwardRef,
+} from "react"; // Added useImperativeHandle, forwardRef
+// import "./ProgressBar.css";
 
-const ProgressBar = ({
-  totalUserScore,
-  setTotalUserScore,
-  userScore,
-  setUserScore,
-  startProgressBar,
-  setStartProgressBar,
-  collapsing,
-  setCollapsing,
-  restartProgressBar,
-  setRestartProgressBar,
-}) => {
-  //   console.log("ProgressBar: setPoints prop:", setPoints);
-  const [width, setWidth] = useState(100);
-  const [points, setPoints] = useContext(PointsContext);
-  //   const [displayedPoints, setDisplayedPoints] = useState(1000);
-  //   const [collapsing, setCollapsing] = useState(false);
-  //   const intervalRef = useRef(null);
-  const progressBarInnerRef = useRef(null);
+const ProgressBar = forwardRef(
+  (
+    {
+      // Wrapped in forwardRef
+      collapsing,
+      setCollapsing,
+      restartProgressBar,
+      setRestartProgressBar,
+    },
+    ref
+  ) => {
+    // Added ref prop
+    const [width, setWidth] = useState(100);
+    const [displayedPoints, setDisplayedPoints] = useState(1000); // Local state for points display
+    const progressBarInnerRef = useRef(null);
 
-  useEffect(() => {
-    if (restartProgressBar) {
-      setWidth(100);
-      setPoints(1000);
-      setRestartProgressBar(false);
-    }
+    // Expose displayedPoints via imperative handle so GamePlay can read it
+    useImperativeHandle(ref, () => ({
+      getDisplayedPoints: () => displayedPoints,
+      resetProgressBar: () => {
+        // Method to be called by GamePlay to reset the bar
+        setWidth(100);
+        setDisplayedPoints(1000);
+        setCollapsing(false);
+        setRestartProgressBar(false); // Consume the restart trigger
+      },
+    }));
 
-    const startCollapse = setTimeout(() => {
-      setCollapsing(true);
-    }, 3000);
+    useEffect(() => {
+      console.log("ProgressBar: Primary useEffect triggered.");
 
-    const updateWidth = () => {
-      if (progressBarInnerRef.current) {
-        const currentWidth = progressBarInnerRef.current.offsetWidth;
-        const parentWidth =
-          progressBarInnerRef.current.parentNode?.offsetWidth || 1; // Avoid division by zero
-        const percentageWidth = (currentWidth / parentWidth) * 100;
-        setWidth(Math.max(0, Math.min(100, Math.round(percentageWidth)))); // Update state as percentage
+      // Reset logic when restartProgressBar is true
+      if (restartProgressBar) {
+        console.log(
+          "ProgressBar: Resetting for new question (triggered by GamePlay)."
+        );
+        setWidth(100); // Reset visual width
+        setDisplayedPoints(1000); // Reset local displayed points
+        setCollapsing(false); // Ensure animation class is removed
+        setRestartProgressBar(false); // Consume the restart trigger
       }
-    };
 
-    let animationFrameId;
+      // Timeout to start the collapse animation after 3 seconds
+      const startCollapseTimeout = setTimeout(() => {
+        console.log("ProgressBar: Starting collapse animation.");
+        setCollapsing(true); // Apply CSS class to start animation
+      }, 3000);
 
-    const animationCallback = () => {
-      updateWidth();
-      animationFrameId = requestAnimationFrame(animationCallback);
-    };
+      // Function to read current width and update local state
+      const updateWidthAndDisplayedPoints = () => {
+        if (progressBarInnerRef.current) {
+          const currentWidthPx = progressBarInnerRef.current.offsetWidth;
+          const parentWidthPx =
+            progressBarInnerRef.current.parentNode?.offsetWidth || 1;
+          const percentageWidth = (currentWidthPx / parentWidthPx) * 100;
 
-    if (collapsing && progressBarInnerRef.current) {
-      animationFrameId = requestAnimationFrame(animationCallback);
-    }
+          const newWidth = Math.max(
+            0,
+            Math.min(100, Math.round(percentageWidth))
+          );
+          setWidth(newWidth); // Update local width for visual bar
 
-    return () => {
-      clearTimeout(startCollapse);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [collapsing, startProgressBar]);
+          // Update local displayed points based on current visual width
+          const calculatedPoints = Math.round(newWidth * 10);
+          setDisplayedPoints(calculatedPoints);
 
-  useEffect(() => {
-    // Update points based on the width state
-    setPoints(Math.round(width * 10));
-    if (width === 0) {
-      setRestartProgressBar(true);
-      //   console.log("Progress restartProgressBar: ", restartProgressBar);
-      //   setCollapsing(false);
-      //   console.log("Progressbar restart");
-    }
-  }, [width]);
+          // When bar reaches 0, signal restart
+          if (newWidth === 0) {
+            console.log("ProgressBar: Bar reached 0%, triggering restart.");
+            setRestartProgressBar(true); // Trigger restart logic in GamePlay for next question
+          }
+        }
+      };
 
-  useEffect(() => {
-    console.log("RESTART: ", restartProgressBar);
-  }, [restartProgressBar]);
+      let animationFrameId;
 
-  //   const points = Math.round(width * 10);
+      // Callback for requestAnimationFrame to continuously update width
+      const animationCallback = () => {
+        updateWidthAndDisplayedPoints();
+        animationFrameId = requestAnimationFrame(animationCallback);
+      };
 
-  return (
-    <div className="text-center">
-      <div className="flex justify-center ">
-        {" "}
-        <div>
-          <span className="progress-bar-outer">
-            <span
-              ref={progressBarInnerRef}
-              className={`progress-bar-inner ${collapsing && "collapse-width"}`}
-              style={{ width: `${width}%` }}
-            ></span>
-          </span>
+      // Start requestAnimationFrame loop only when collapsing is true and ref is available
+      if (collapsing && progressBarInnerRef.current) {
+        console.log("ProgressBar: RequestAnimationFrame loop started.");
+        animationFrameId = requestAnimationFrame(animationCallback);
+      }
+
+      // Cleanup function for useEffect
+      return () => {
+        console.log("ProgressBar: Cleanup function running.");
+        clearTimeout(startCollapseTimeout);
+        cancelAnimationFrame(animationFrameId);
+      };
+    }, [collapsing, restartProgressBar, setCollapsing, setRestartProgressBar]); // Dependencies updated
+
+    // This useEffect is for logging and can be kept or removed for production
+    useEffect(() => {
+      console.log("ProgressBar: restartProgressBar state:", restartProgressBar);
+    }, [restartProgressBar]);
+
+    return (
+      <div className="text-center">
+        <div className="flex justify-center ">
+          {" "}
+          <div>
+            <span className="progress-bar-outer">
+              <span
+                ref={progressBarInnerRef}
+                className={`progress-bar-inner ${
+                  collapsing && "collapse-width"
+                }`}
+                style={{ width: `${width}%` }} // Use local 'width' for visual bar
+              ></span>
+            </span>
+          </div>
+          <br />
         </div>
-        <br />
+        <div>POINTS: {displayedPoints}</div>{" "}
+        {/* Display local 'displayedPoints' */}
       </div>
-      <div>POINTS: {points}</div>
-    </div>
-  );
-};
+    );
+  }
+); // End of forwardRef
 
 export default ProgressBar;
