@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useUserStore } from "../Zustand/store";
 
 const LoginForm = () => {
   const [name, setName] = useState("");
@@ -8,6 +9,7 @@ const LoginForm = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const logIn = useUserStore((state) => state.logIn);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,12 +25,13 @@ const LoginForm = () => {
 
       const { token, user, message } = response.data;
 
-      localStorage.setItem("token", token);
+      localStorage.setItem("Bar-Trivia-Token", token);
       localStorage.setItem("Bar-Trivia-Username", user.name); // Assuming you want to store the username
       localStorage.setItem("Bar-Trivia-User-High-Score", user.highScore);
       setSuccessMessage(message);
       setError("");
       console.log("Login successful:", response.data);
+      logIn();
       navigate("/gameParent");
     } catch (err) {
       if (err.response && err.response.status === 404) {

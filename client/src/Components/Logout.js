@@ -1,13 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserStore } from "../Zustand/store";
 
 const Logout = () => {
   const navigate = useNavigate();
+  const logOut = useUserStore((state) => state.logOut);
 
   const handleLogout = () => {
     // Remove the token from localStorage
-    localStorage.removeItem("token");
-    // localStorage.removeItem("bar-trivia-username"); // Remove username if stored
+    localStorage.removeItem("Bar-Trivia-Token");
+    localStorage.removeItem("Bar-Trivia-Username"); // Remove username if stored
+    logOut();
 
     // Navigate the user to the login page
     navigate("/login");

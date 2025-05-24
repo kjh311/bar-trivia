@@ -31,7 +31,7 @@ const RegisterForm = () => {
 
       const { token, user, message } = response.data; // Correctly destructure message
 
-      localStorage.setItem("token", token);
+      localStorage.setItem("Bar-Trivia-Token", token);
       localStorage.setItem("Bar-Trivia-Username", user.name);
       setSuccessMessage(message); // Use message directly
       setError("");

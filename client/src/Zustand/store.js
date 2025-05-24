@@ -10,6 +10,26 @@ export const useUserStore = create((set, get) => {
       set((state) => ({ totalUserScore: state.totalUserScore + points })),
     resetTotalUserScore: () => set({ totalUserScore: 0 }),
     highScore: localStorage.getItem("Bar-Trivia-User-High-Score") || 0, // Added || 0 for initial number value
+    loggedIn: localStorage.getItem("Bar-Trivia-LoggedIn") === "true",
+    logIn: () => {
+      // 1. Update the Zustand state
+      set({ loggedIn: true });
+      // 2. Perform the side effect to localStorage. Remember to store a string!
+      localStorage.setItem("Bar-Trivia-LoggedIn", "true");
+      console.log("User logged in. State and localStorage updated.");
+    },
+    logOut: () => {
+      // 1. Update the Zustand state
+      set({ loggedIn: false });
+      // 2. Perform the side effect to localStorage. Best to remove the item or set it to "false".
+      localStorage.removeItem("Bar-Trivia-LoggedIn"); // Clears the item from localStorage
+      // Or you could set it to "false": localStorage.setItem("Bar-Trivia-LoggedIn", "false");
+      console.log("User logged out. State and localStorage updated.");
+      // You might also want to clear other user-specific data on logout
+      // set({ userName: "", totalUserScore: 0, highScore: 0 });
+      //   localStorage.removeItem("Bar-Trivia-Username");
+      localStorage.removeItem("Bar-Trivia-User-High-Score");
+    },
 
     // Action to update high score based on current game score
     updateHighScore: () => {
