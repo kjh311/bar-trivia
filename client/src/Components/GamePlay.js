@@ -1,27 +1,13 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { decode } from "he";
-import MyButton from "./MyButton"; // Assuming this is used elsewhere
 import ProgressBar from "./ProgressBar";
-// Removed import for PointsContext
 import { useNavigate } from "react-router-dom";
-import { UserNameContext } from "../App"; // Ensure correct path to context
-import { HighScoreContext, TotalScoreContext } from "../App";
-// import axios from "axios";
+import { useUserStore } from "../Zustand/store";
 
 const GamePlay = ({
-  categories,
-  setCategories,
-  inviteeName,
-  setInviteeName,
-  invitedPlayers,
-  setInvitedPlayers,
-  isReady,
-  setIsReady,
   selectedCategory,
-  setSelectedCategory,
   selectedDifficulty,
-  setSelectedDifficulty,
   setAnswered,
   setUserAnswer,
   correctAnswer,
@@ -40,19 +26,30 @@ const GamePlay = ({
   const [error, setError] = useState(null);
   const [options, setOptions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  // const [currentBarPoints, setCurrentBarPoints] = useState(1000); // Removed this state
   const progressBarRef = useRef(null); // Ref to access ProgressBar's methods/values
-  const [userScore, setUserScore] = useState(0); // This seems unused, consider removing if not needed
   const [restartProgressBar, setRestartProgressBar] = useState(false); // State to signal ProgressBar to reset
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
   const retryDelayMs = 3000;
   const [startProgressBar, setStartProgressBar] = useState(false); // This state seems unused, consider removing
   const navigate = useNavigate();
-  const [highScore, setHighScore] = useContext(HighScoreContext);
-  const [userName, setUserName] = useContext(UserNameContext);
-  const [totalUserScore, setTotalUserScore] = useContext(TotalScoreContext);
+  const userName = useUserStore((state) => state.userName);
+  const totalUserScore = useUserStore((state) => state.totalUserScore);
+  const highScore = useUserStore((state) => state.highScore);
+  const updateHighScore = useUserStore((state) => state.updateHighScore);
+  const setHighScoreFromAPI = useUserStore(
+    (state) => state.setHighScoreFromAPI
+  );
+  const addPointsToTotalUserScore = useUserStore(
+    (state) => state.addPointsToTotalUserScore
+  );
+  const resetTotalUserScore = useUserStore(
+    (state) => state.resetTotalUserScore
+  );
   console.log("GamePlay: totalScore:", totalUserScore);
+  const fetchTriviaWithRetry = () => {
+    fetchTrivia();
+  };
 
   // Fetch trivia on component mount
   useEffect(() => {
@@ -62,12 +59,13 @@ const GamePlay = ({
 
   // Update high score when totalUserScore changes
   useEffect(() => {
-    setHighScore(Math.max(totalUserScore, highScore));
+    // setHighScore(Math.max(totalUserScore, highScore));
+    updateHighScore();
     console.log(
       "GamePlay: SetHighScore triggered. Current High Score:",
       highScore
     );
-  }, [totalUserScore, highScore, setHighScore]); // Added setHighScore to dependencies
+  }, [totalUserScore, highScore, updateHighScore]); // Added setHighScore to dependencies
 
   // Log playersInRoom prop
   useEffect(() => {
@@ -97,7 +95,8 @@ const GamePlay = ({
       const res = await axios.get(url);
       setTriviaData(res.data.results || []);
       setRetryCount(0);
-      setTotalUserScore(0);
+      //   setTotalUserScore(0);
+      resetTotalUserScore();
     } catch (err) {
       setError(err);
       if (err.response?.status === 429 && retryCount < maxRetries) {
@@ -114,10 +113,6 @@ const GamePlay = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchTriviaWithRetry = () => {
-    fetchTrivia();
   };
 
   const handleSetDataBaseHighScore = async (newScore) => {
@@ -148,9 +143,9 @@ const GamePlay = ({
       console.log("High score update response:", response.data);
       // You might want to update the local highScore state here if the backend confirms a new high score
       if (response.data.user && response.data.user.highScore) {
-        setHighScore(response.data.user.highScore);
+        // setHighScore(response.data.user.highScore);
+        setHighScoreFromAPI();
       }
-      navigate("../afterGame");
     } catch (err) {
       console.error("Error updating high score:", err);
       // Handle error (e.g., display a message to the user)
@@ -185,10 +180,12 @@ const GamePlay = ({
       // All questions answered
       console.log("GamePlay: All questions answered, navigating to afterGame.");
       alert("End of questions!"); // Use custom modal instead of alert in production
+
       if (highScore > localStorage.getItem("Bar-Trivia-User-High-Score")) {
         localStorage.setItem("Bar-Trivia-User-High-Score", highScore);
         handleSetDataBaseHighScore(highScore);
       }
+      navigate("../afterGame");
     }
   }, [
     triviaData,
@@ -198,6 +195,7 @@ const GamePlay = ({
     setCollapsing,
     setUserAnswer,
     navigate,
+    highScore,
   ]); // Added all dependencies
 
   // Logic to handle progress bar restart and next question
@@ -230,7 +228,8 @@ const GamePlay = ({
 
       if (selectedAnswer === correctAnswer) {
         console.log("GamePlay: Correct answer! Adding points:", pointsEarned);
-        setTotalUserScore((prev) => prev + pointsEarned);
+        // setTotalUserScore((prev) => prev + pointsEarned);
+        addPointsToTotalUserScore(pointsEarned);
       } else {
         console.log("GamePlay: Incorrect answer.");
       }

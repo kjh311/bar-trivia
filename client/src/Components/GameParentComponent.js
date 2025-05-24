@@ -1,9 +1,10 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import GameSetup from "./GameSetup";
 import GamePlay from "./GamePlay";
 import { io } from "socket.io-client";
-import { UserNameContext } from "../App"; // Ensure correct path to context
-import AfterGame from "./AfterGame"; // Assuming this is used elsewhere
+// import { UserNameContext } from "../App"; // Ensure correct path to context
+// import AfterGame from "./AfterGame"; // Assuming this is used elsewhere
+import { useUserStore } from "../Zustand/store";
 
 const GameParentComponent = () => {
   console.log("Parent Component: Rendered.");
@@ -15,18 +16,15 @@ const GameParentComponent = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
 
   const [socket, setSocket] = useState(null);
-  const [currentQuestion, setCurrentQuestion] = useState(null); // This seems unused, currentSocketQuestion is used
   const [playersInRoom, setPlayersInRoom] = useState([]);
   const roomIdRef = useRef(null);
   const [currentSocketQuestion, setCurrentSocketQuestion] = useState(null);
   const [answered, setAnswered] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState(null);
   const [userAnswer, setUserAnswer] = useState(null);
-  const [userName, setUserName] = useContext(UserNameContext);
+  const userName = useUserStore((state) => state.userName);
 
   const [collapsing, setCollapsing] = useState(false); // Controls ProgressBar animation
-  //   const [totalUserScore, setTotalUserScore] = useState(0); // Global score
-  //   const [highScore, setHighScore] = useState(0); // Global high score
 
   useEffect(() => {
     console.log("GameParentComponent: Socket setup useEffect.");
@@ -135,10 +133,6 @@ const GameParentComponent = () => {
           userAnswer={userAnswer}
           collapsing={collapsing}
           setCollapsing={setCollapsing}
-          //   totalUserScore={totalUserScore}
-          //   setTotalUserScore={setTotalUserScore}
-          //   highScore={highScore}
-          //   setHighScore={setHighScore}
         />
       )}
     </div>

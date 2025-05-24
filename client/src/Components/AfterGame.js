@@ -1,12 +1,15 @@
-import React, { useContext } from "react";
+import React from "react";
 // import { PointsContext } from "../App";
 import { Link } from "react-router-dom";
-import { HighScoreContext, TotalScoreContext } from "../App";
+// import { HighScoreContext, TotalScoreContext } from "../App";
+import { useUserStore } from "../Zustand/store";
 
 const AfterGame = () => {
   //   const [points, setPoints] = useContext(PointsContext);
-  const [highScore, setHighScore] = useContext(HighScoreContext);
-  const [totalUserScore, setTotalUserScore] = useContext(TotalScoreContext);
+  //   const [highScore, setHighScore] = useContext(HighScoreContext);
+  //   const [totalUserScore, setTotalUserScore] = useContext(TotalScoreContext);
+  const totalUserScore = useUserStore((state) => state.totalUserScore);
+  const highScore = useUserStore((state) => state.highScore);
 
   //   const handleResetUserScore = () => {
   //     setTotalUserScore(0);
