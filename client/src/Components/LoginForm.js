@@ -28,10 +28,11 @@ const LoginForm = () => {
       localStorage.setItem("Bar-Trivia-Token", token);
       localStorage.setItem("Bar-Trivia-Username", user.name); // Assuming you want to store the username
       localStorage.setItem("Bar-Trivia-User-High-Score", user.highScore);
+      logIn();
       setSuccessMessage(message);
       setError("");
       console.log("Login successful:", response.data);
-      logIn();
+
       navigate("/gameParent");
     } catch (err) {
       if (err.response && err.response.status === 404) {

@@ -21,6 +21,7 @@ const AfterGame = () => {
       <br />
       <br />
       <br />
+      <h1 className="text-3xl">Awesome Job!!!</h1>
       <h3>Your Score: {totalUserScore}!!</h3>
       <h3>Your High Score: {highScore}!!</h3>
       <br />

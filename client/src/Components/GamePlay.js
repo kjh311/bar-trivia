@@ -120,7 +120,7 @@ const GamePlay = ({
       console.log("Cannot update high score: No username available.");
       return;
     }
-    const token = localStorage.getItem("token"); // Get the authentication token
+    const token = localStorage.getItem("Bar-Trivia-Token"); // Get the authentication token
     if (!token) {
       console.log("Cannot update high score: No authentication token found.");
       return;
@@ -179,7 +179,7 @@ const GamePlay = ({
     ) {
       // All questions answered
       console.log("GamePlay: All questions answered, navigating to afterGame.");
-      alert("End of questions!"); // Use custom modal instead of alert in production
+      //   alert("End of questions!"); // Use custom modal instead of alert in production
 
       if (highScore > localStorage.getItem("Bar-Trivia-User-High-Score")) {
         localStorage.setItem("Bar-Trivia-User-High-Score", highScore);

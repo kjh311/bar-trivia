@@ -43,10 +43,12 @@ const ProgressBar = forwardRef(
         console.log(
           "ProgressBar: Resetting for new question (triggered by GamePlay)."
         );
+        // setTimeout(() => {
         setWidth(100); // Reset visual width
         setDisplayedPoints(1000); // Reset local displayed points
         setCollapsing(false); // Ensure animation class is removed
         setRestartProgressBar(false); // Consume the restart trigger
+        // }, 3000);
       }
 
       // Timeout to start the collapse animation after 3 seconds

@@ -27,7 +27,7 @@ export const useUserStore = create((set, get) => {
       console.log("User logged out. State and localStorage updated.");
       // You might also want to clear other user-specific data on logout
       // set({ userName: "", totalUserScore: 0, highScore: 0 });
-      //   localStorage.removeItem("Bar-Trivia-Username");
+      localStorage.removeItem("Bar-Trivia-Username");
       localStorage.removeItem("Bar-Trivia-User-High-Score");
     },
 
